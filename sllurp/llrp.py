@@ -60,7 +60,10 @@ class LLRPMessage(object):
         self.msgbytes = struct.pack(self.full_hdr_fmt,
                                     (ver << 10) | msgtype,
                                     len(data) + self.full_hdr_len,
-                                    msgid) + data
+                                    msgid)
+        if data:
+            self.msgbytes += data
+
         logger.debug('serialized bytes: %s', hexlify(self.msgbytes))
         logger.debug('done serializing %s command', name)
 
@@ -68,7 +71,7 @@ class LLRPMessage(object):
         """Turns a sequence of bytes into a message dictionary."""
         if self.msgbytes is None:
             raise LLRPError('No message bytes to deserialize.')
-        data = ''.join(self.msgbytes)
+        data = self.msgbytes
         msgtype, length, msgid = struct.unpack(self.full_hdr_fmt,
                                                data[:self.full_hdr_len])
         ver = (msgtype >> 10) & BITMASK(3)
@@ -601,8 +604,7 @@ class LLRPClient(LineReceiver):
                          ' but there are!', msgName)
 
     def rawDataReceived(self, data):
-        logger.debug('got %d bytes from reader: %s', len(data),
-                     data.encode('hex'))
+        logger.debug('got %d bytes from reader: %s', len(data), hexlify(data))
 
         if self.expectingRemainingBytes:
             if len(data) >= self.expectingRemainingBytes:
