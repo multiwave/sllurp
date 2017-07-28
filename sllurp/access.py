@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 import argparse
 import binascii
 import logging
@@ -37,7 +37,7 @@ def finish(_):
     runTime = (endTime - startTime) if (endTime > startTime) else 0
 
     logger.info('total # of tags seen: %d (%d tags/second)', tagReport,
-                tagReport/runTime)
+                tagReport / runTime)
     if reactor.running:
         reactor.stop()
 

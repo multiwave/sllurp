@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 import argparse
 import csv
 import logging
@@ -125,7 +125,7 @@ def main():
         if not args.tari:
             args.tari = t_suggested
 
-    enabled_antennas = map(lambda x: int(x.strip()), args.antennas.split(','))
+    enabled_antennas = [int(x.strip()) for x in args.antennas.split(',')]
 
     fac = llrp.LLRPClientFactory(start_first=True,
                                  duration=args.time,
@@ -164,7 +164,7 @@ def main():
             port = args.port
         if args.stagger is not None:
             logging.debug('Will connect to %s:%d in %d ms', host, port, delay)
-            task.deferLater(reactor, delay/1000.0,
+            task.deferLater(reactor, delay / 1000.0,
                             reactor.connectTCP,
                             host, port, fac, timeout=3)
             delay += args.stagger

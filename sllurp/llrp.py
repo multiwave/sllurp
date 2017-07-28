@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from collections import defaultdict
 import time
 import logging
@@ -10,7 +10,7 @@ from .llrp_proto import LLRPROSpec, LLRPError, Message_struct, \
     DEFAULT_MODULATION
 from .llrp_errors import ReaderConfigurationError
 from binascii import hexlify
-from util import BITMASK, natural_keys
+from .util import BITMASK, natural_keys
 from twisted.internet import reactor, task, defer
 from twisted.internet.protocol import ClientFactory
 from twisted.protocols.basic import LineReceiver
@@ -46,7 +46,7 @@ class LLRPMessage(object):
     def serialize(self):
         if self.msgdict is None:
             raise LLRPError('No message dict to serialize.')
-        name = self.msgdict.keys()[0]
+        name = list(self.msgdict.keys())[0]
         logger.debug('serializing %s command', name)
         ver = self.msgdict[name]['Ver'] & BITMASK(3)
         msgtype = self.msgdict[name]['Type'] & BITMASK(10)
@@ -116,7 +116,7 @@ class LLRPMessage(object):
     def getName(self):
         if not self.msgdict:
             return None
-        return self.msgdict.keys()[0]
+        return list(self.msgdict.keys())[0]
 
     def __repr__(self):
         try:
@@ -276,7 +276,7 @@ class LLRPClient(LineReceiver):
         max_ant = gdc['MaxNumberOfAntennaSupported']
         if max(self.antennas) > max_ant:
             reqd = ','.join(map(str, self.antennas))
-            avail = ','.join(map(str, range(1, max_ant + 1)))
+            avail = ','.join(map(str, list(range(1, max_ant + 1))))
             errmsg = ('Invalid antenna set specified: requested={},'
                       ' available={}; ignoring invalid antennas'.format(
                           reqd, avail))
@@ -292,7 +292,7 @@ class LLRPClient(LineReceiver):
         # fill UHFC1G2RFModeTable & check requested modulation & Tari
         regcap = capdict['RegulatoryCapabilities']
         modes = regcap['UHFBandCapabilities']['UHFRFModeTable']
-        mode_list = [modes[k] for k in sorted(modes.keys(), key=natural_keys)]
+        mode_list = [modes[k] for k in sorted(list(modes.keys()), key=natural_keys)]
 
         # select a mode by matching available modes to requested parameters:
         # favor mode_identifier over modulation
@@ -661,17 +661,17 @@ class LLRPClient(LineReceiver):
     def send_KEEPALIVE_ACK(self):
         self.sendLLRPMessage(LLRPMessage(msgdict={
             'KEEPALIVE_ACK': {
-                'Ver':  1,
+                'Ver': 1,
                 'Type': 72,
-                'ID':   0,
+                'ID': 0,
             }}))
 
     def send_GET_READER_CAPABILITIES(self, onCompletion):
         self.sendLLRPMessage(LLRPMessage(msgdict={
             'GET_READER_CAPABILITIES': {
-                'Ver':  1,
+                'Ver': 1,
                 'Type': 1,
-                'ID':   0,
+                'ID': 0,
                 'RequestedData': Capability_Name2Type['All']
             }}))
         self.setState(LLRPClient.STATE_SENT_GET_CAPABILITIES)
@@ -681,9 +681,9 @@ class LLRPClient(LineReceiver):
     def send_GET_READER_CONFIG(self, onCompletion):
         self.sendLLRPMessage(LLRPMessage(msgdict={
             'GET_READER_CONFIG': {
-                'Ver':  1,
+                'Ver': 1,
                 'Type': 2,
-                'ID':   0,
+                'ID': 0,
                 'RequestedData': Capability_Name2Type['All']
             }}))
         self.setState(LLRPClient.STATE_SENT_GET_CONFIG)
@@ -701,9 +701,9 @@ class LLRPClient(LineReceiver):
     def send_SET_READER_CONFIG(self, onCompletion):
         self.sendLLRPMessage(LLRPMessage(msgdict={
             'SET_READER_CONFIG': {
-                'Ver':  1,
+                'Ver': 1,
                 'Type': 3,
-                'ID':   0,
+                'ID': 0,
                 'ResetToFactoryDefaults': False,
             }}))
         self.setState(LLRPClient.STATE_SENT_SET_CONFIG)
@@ -715,9 +715,9 @@ class LLRPClient(LineReceiver):
         try:
             add_rospec = LLRPMessage(msgdict={
                 'ADD_ROSPEC': {
-                    'Ver':  1,
+                    'Ver': 1,
                     'Type': 20,
-                    'ID':   0,
+                    'ID': 0,
                     'ROSpecID': rospec['ROSpecID'],
                     'ROSpec': rospec,
                 }})
@@ -732,9 +732,9 @@ class LLRPClient(LineReceiver):
     def send_ENABLE_ROSPEC(self, _, rospec, onCompletion):
         self.sendLLRPMessage(LLRPMessage(msgdict={
             'ENABLE_ROSPEC': {
-                'Ver':  1,
+                'Ver': 1,
                 'Type': 24,
-                'ID':   0,
+                'ID': 0,
                 'ROSpecID': rospec['ROSpecID']
             }}))
         self.setState(LLRPClient.STATE_SENT_ENABLE_ROSPEC)
@@ -743,9 +743,9 @@ class LLRPClient(LineReceiver):
     def send_START_ROSPEC(self, _, rospec, onCompletion):
         self.sendLLRPMessage(LLRPMessage(msgdict={
             'START_ROSPEC': {
-                'Ver':  1,
+                'Ver': 1,
                 'Type': 22,
-                'ID':   0,
+                'ID': 0,
                 'ROSpecID': rospec['ROSpecID']
             }}))
         self.setState(LLRPClient.STATE_SENT_START_ROSPEC)
@@ -754,9 +754,9 @@ class LLRPClient(LineReceiver):
     def send_ADD_ACCESSSPEC(self, accessSpec, onCompletion):
         self.sendLLRPMessage(LLRPMessage(msgdict={
             'ADD_ACCESSSPEC': {
-                'Ver':  1,
+                'Ver': 1,
                 'Type': 40,
-                'ID':   0,
+                'ID': 0,
                 'AccessSpec': accessSpec,
             }}))
         self._deferreds['ADD_ACCESSSPEC_RESPONSE'].append(onCompletion)
@@ -764,9 +764,9 @@ class LLRPClient(LineReceiver):
     def send_DISABLE_ACCESSSPEC(self, accessSpecID=1, onCompletion=None):
         self.sendLLRPMessage(LLRPMessage(msgdict={
             'DISABLE_ACCESSSPEC': {
-                'Ver':  1,
+                'Ver': 1,
                 'Type': 43,
-                'ID':   0,
+                'ID': 0,
                 'AccessSpecID': accessSpecID,
             }}))
 
@@ -776,9 +776,9 @@ class LLRPClient(LineReceiver):
     def send_ENABLE_ACCESSSPEC(self, _, accessSpecID, onCompletion=None):
         self.sendLLRPMessage(LLRPMessage(msgdict={
             'ENABLE_ACCESSSPEC': {
-                'Ver':  1,
+                'Ver': 1,
                 'Type': 42,
-                'ID':   0,
+                'ID': 0,
                 'AccessSpecID': accessSpecID,
             }}))
 
@@ -975,9 +975,9 @@ class LLRPClient(LineReceiver):
     def stopAllROSpecs(self, *args):
         self.sendLLRPMessage(LLRPMessage(msgdict={
             'DELETE_ROSPEC': {
-                'Ver':  1,
+                'Ver': 1,
                 'Type': 21,
-                'ID':   0,
+                'ID': 0,
                 'ROSpecID': 0
             }}))
         self.setState(LLRPClient.STATE_SENT_DELETE_ROSPEC)
@@ -1002,10 +1002,10 @@ class LLRPClient(LineReceiver):
         >>> LLRPClient.parsePowerTable({})
         [0]
         """
-        bandtbl = {k: v for k, v in uhfbandcap.items()
+        bandtbl = {k: v for k, v in list(uhfbandcap.items())
                    if k.startswith('TransmitPowerLevelTableEntry')}
         tx_power_table = [0] * (len(bandtbl) + 1)
-        for k, v in bandtbl.items():
+        for k, v in list(bandtbl.items()):
             idx = v['Index']
             tx_power_table[idx] = int(v['TransmitPowerValue']) / 100.0
 
@@ -1068,9 +1068,9 @@ class LLRPClient(LineReceiver):
 
         self.sendLLRPMessage(LLRPMessage(msgdict={
             'DISABLE_ROSPEC': {
-                'Ver':  1,
+                'Ver': 1,
                 'Type': 25,
-                'ID':   0,
+                'ID': 0,
                 'ROSpecID': rospec['ROSpecID']
             }}))
         self.setState(LLRPClient.STATE_PAUSING)
@@ -1153,12 +1153,12 @@ class LLRPClientFactory(ClientFactory):
         proto = LLRPClient(factory=self, **clargs)
 
         # register state-change callbacks with new client
-        for state, cbs in self._state_callbacks.items():
+        for state, cbs in list(self._state_callbacks.items()):
             for cb in cbs:
                 proto.addStateCallback(state, cb)
 
         # register message callbacks with new client
-        for msg_type, cbs in self._message_callbacks.items():
+        for msg_type, cbs in list(self._message_callbacks.items()):
             for cb in cbs:
                 proto.addMessageCallback(msg_type, cb)
 

@@ -1,7 +1,7 @@
 """Inventory command.
 """
 
-from __future__ import print_function, division
+
 import logging
 import pprint
 import time
@@ -60,7 +60,7 @@ def main(args):
             logger.info('selected recommended Tari of %d for %s', args.tari,
                         args.modulation)
 
-    enabled_antennas = map(lambda x: int(x.strip()), args.antennas.split(','))
+    enabled_antennas = [int(x.strip()) for x in args.antennas.split(',')]
 
     # d.callback will be called when all connections have terminated normally.
     # use d.addCallback(<callable>) to define end-of-program behavior.

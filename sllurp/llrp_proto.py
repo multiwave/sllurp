@@ -27,9 +27,9 @@ import logging
 import struct
 from collections import defaultdict
 from binascii import hexlify
-from util import BIT, BITMASK, func, reverse_dict
-import llrp_decoder
-from llrp_errors import LLRPError
+from .util import BIT, BITMASK, func, reverse_dict
+from . import llrp_decoder
+from .llrp_errors import LLRPError
 
 #
 # Define exported symbols
@@ -121,40 +121,40 @@ AirProtocol = {
 
 # 9.1.1 Capabilities requests
 Capability_Name2Type = {
-    'All':                  0,
-    'General Device Capabilities':      1,
-    'LLRP Capabilities':            2,
-    'Regulatory Capabilities':      3,
-    'Air Protocol LLRP Capabilities':   4
+    'All': 0,
+    'General Device Capabilities': 1,
+    'LLRP Capabilities': 2,
+    'Regulatory Capabilities': 3,
+    'Air Protocol LLRP Capabilities': 4
 }
 
 Capability_Type2Name = reverse_dict(Capability_Name2Type)
 
 # 10.2.1 ROSpec states
 ROSpecState_Name2Type = {
-    'Disabled':             0,
-    'Inactive':             1,
-    'Active':               2
+    'Disabled': 0,
+    'Inactive': 1,
+    'Active': 2
 }
 
 ROSpecState_Type2Name = reverse_dict(ROSpecState_Name2Type)
 
 # 10.2.1.1.1 ROSpec Start trigger
 StartTrigger_Name2Type = {
-    'Null':                 0,
-    'Immediate':                1,
-    'Periodic':             2,
-    'GPI':                  3
+    'Null': 0,
+    'Immediate': 1,
+    'Periodic': 2,
+    'GPI': 3
 }
 
 StartTrigger_Type2Name = reverse_dict(StartTrigger_Name2Type)
 
 # 10.2.1.1.2 ROSpec Stop trigger
 StopTrigger_Name2Type = {
-    'Null':                 0,
-    'Duration':             1,
-    'GPI with timeout':         2,
-    'Tag observation':          3
+    'Null': 0,
+    'Duration': 1,
+    'GPI with timeout': 2,
+    'Tag observation': 3
 }
 
 StopTrigger_Type2Name = reverse_dict(StopTrigger_Name2Type)
@@ -169,11 +169,11 @@ TagObservationTrigger_Name2Type = {
 
 # 13.2.6.11 Connection attemp events
 ConnEvent_Name2Type = {
-    'Success':                          0,
-    'Failed (a Reader initiated connection already exists)':    1,
-    'Failed (a Client initiated connection already exists)':    2,
-    'Failed (any reason other than a connection already exists)':   3,
-    'Another connection attempted':                 4,
+    'Success': 0,
+    'Failed (a Reader initiated connection already exists)': 1,
+    'Failed (a Client initiated connection already exists)': 2,
+    'Failed (any reason other than a connection already exists)': 3,
+    'Another connection attempted': 4,
 }
 
 ConnEvent_Type2Name = reverse_dict(ConnEvent_Name2Type)
@@ -1495,7 +1495,7 @@ def decode_PerAntennaAirProtocol(data):
     body = body[fmt_len:]
     num = int(par['NumProtocols'])
     id_fmt = '!B'
-    for i in xrange(num):
+    for i in range(num):
         par['ProtocolID{}'.format(i + 1)] = struct.unpack(id_fmt, body[i])[0]
 
     return par, data[length:]
@@ -1865,7 +1865,7 @@ Message_struct['C1G2TagSpec'] = {
 def encode_bitstring(bstr, length_bytes):
     def B(x):
         return struct.pack('!B', x)
-    Bs = map(B, struct.unpack('>' + 'B' * len(bstr), bstr))
+    Bs = list(map(B, struct.unpack('>' + 'B' * len(bstr), bstr)))
     Bs += ['\x00'] * (length_bytes - len(bstr))
     return ''.join(Bs)
 
@@ -2538,7 +2538,7 @@ def encode_ReaderEventNotificationSpec(par):
     states = par['EventNotificationState']
 
     data = ''
-    for ev_type, flag in states.items():
+    for ev_type, flag in list(states.items()):
         parlen = struct.calcsize('!HHHB')
         data += struct.pack('!HHHB', 245, parlen, ev_type,
                             (int(bool(flag)) << 7) & 0xff)
@@ -3095,7 +3095,7 @@ def decode_LLRPStatus(data):
 
 
 Message_struct['LLRPStatus'] = {
-    'type':   287,
+    'type': 287,
     'fields': [
         'Type',
         'StatusCode',
@@ -3132,7 +3132,7 @@ def decode_FieldError(data):
 
 
 Message_struct['FieldError'] = {
-    'type':   288,
+    'type': 288,
     'fields': [
         'Type',
         'ErrorCode',
@@ -3181,7 +3181,7 @@ def decode_ParameterError(data):
 
 
 Message_struct['ParameterError'] = {
-    'type':   289,
+    'type': 289,
     'fields': [
         'Type',
         'ParameterType',
@@ -3239,7 +3239,7 @@ class LLRPROSpec(dict):
                             priority))
         if state not in ROSpecState_Name2Type:
             raise LLRPError('invalid ROSpec state {} (need [{}])'.format(
-                            state, ','.join(ROSpecState_Name2Type.keys())))
+                            state, ','.join(list(ROSpecState_Name2Type.keys()))))
 
         # if reader mode settings are specified, pepper them into this ROSpec
         override_tari = None
@@ -3367,7 +3367,7 @@ class LLRPMessageDict(dict):
 
 # Reverse dictionary for Message_struct types
 Message_Type2Name = {}
-for msgname, msgstruct in Message_struct.iteritems():
+for msgname, msgstruct in Message_struct.items():
     try:
         ty = msgstruct['type']
     except KeyError:

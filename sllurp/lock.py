@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 import argparse
 import logging
 import pprint
@@ -35,22 +35,22 @@ def finish(_):
     runTime = (endTime - startTime) if (endTime > startTime) else 0
 
     logger.info('total # of tags seen: %d (%d tags/second)', tagReport,
-                tagReport/runTime)
+                tagReport / runTime)
     if reactor.running:
         reactor.stop()
 
 
 def access(proto):
     lockSpecParam = {
-            'OpSpecID': 0,
-            'AccessPassword': args.access_password,
-            'LockPayload': [
-                {
-                    'Privilege': args.privilege,
-                    'DataField': args.data_field,
-                },
-            ]
-        }
+        'OpSpecID': 0,
+        'AccessPassword': args.access_password,
+        'LockPayload': [
+            {
+                'Privilege': args.privilege,
+                'DataField': args.data_field,
+            },
+        ]
+    }
 
     return proto.startAccess(param=lockSpecParam)
 

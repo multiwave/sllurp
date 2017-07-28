@@ -1,7 +1,7 @@
 """Command-line wrapper for sllurp commands.
 """
 
-from __future__ import print_function
+
 from collections import namedtuple
 import logging
 import click
