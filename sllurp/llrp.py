@@ -1148,7 +1148,10 @@ class LLRPClientFactory(ClientFactory):
 
     def buildProtocol(self, _):
         clargs = self.client_args.copy()
-        logger.debug('start_inventory: %s', clargs['start_inventory'])
+
+        if 'start_inventory' in list(clargs.keys()):
+            logger.debug('start_inventory: %s', clargs['start_inventory'])
+
         if self.start_first and not self.protocols:
             # this is the first protocol, so let's start it inventorying
             clargs['start_inventory'] = True
