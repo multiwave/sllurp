@@ -40,7 +40,7 @@ def cli(debug, logfile):
               help='Tari value (default 0=auto)')
 @click.option('-s', '--session', type=int, default=2,
               help='Gen2 session (default 2)')
-@click.option('--mode-identifier', type=int, help='ModeIdentifier value')
+@click.option('-m', '--mode-identifier', type=int, help='ModeIdentifier value')
 @click.option('-P', '--tag-population', type=int, default=4,
               help="Tag Population value (default 4)")
 @click.option('-r', '--reconnect', is_flag=True, default=False,
