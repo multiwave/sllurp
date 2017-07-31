@@ -82,7 +82,7 @@ def tagReportCallback(llrpMsg):
     global tagReport
     tags = llrpMsg.msgdict['RO_ACCESS_REPORT']['TagReportData']
     if len(tags):
-        logger.info('saw tag(s): %s', pprint.pformat(tags))
+        logger.info('saw tag(s):\n%s', pprint.pformat(tags))
     else:
         logger.info('no tags seen')
         return

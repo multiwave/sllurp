@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def finish(*args):
     runtime = max(time.time() - start_time, 0)
     logger.info('total # of tags seen: %d (%d tags/second)', numtags,
-                numtags/runtime)
+                numtags / runtime)
     if reactor.running:
         reactor.stop()
 
@@ -33,7 +33,7 @@ def tag_report_cb(llrp_msg):
     global numtags
     tags = llrp_msg.msgdict['RO_ACCESS_REPORT']['TagReportData']
     if len(tags):
-        logger.info('saw tag(s): %s', pprint.pformat(tags))
+        logger.info('saw tag(s):\n%s', pprint.pformat(tags))
         for tag in tags:
             numtags += tag['TagSeenCount'][0]
     else:
