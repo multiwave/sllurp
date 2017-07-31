@@ -2117,14 +2117,17 @@ def encode_ROSpecStartTrigger(par):
     msg_header = '!HHB'
     msg_header_len = struct.calcsize(msg_header)
 
-    data = ''
+    temp = ''
     if par['ROSpecStartTriggerType'] == 'Periodic':
-        data += encode('PeriodicTriggerValue')(par['PeriodicTriggerValue'])
+        temp += encode('PeriodicTriggerValue')(par['PeriodicTriggerValue'])
     elif par['ROSpecStartTriggerType'] == 'GPI':
-        data += encode('GPITriggerValue')(par['GPITriggerValue'])
+        temp += encode('GPITriggerValue')(par['GPITriggerValue'])
 
     data = struct.pack(msg_header, msgtype,
-                       len(data) + msg_header_len, t_type) + data
+                       len(temp) + msg_header_len, t_type)
+
+    if temp:
+        data += temp
 
     return data
 
@@ -2177,13 +2180,9 @@ def encode_ROSpecStopTrigger(par):
     msg_header = '!HHBI'
     msg_header_len = struct.calcsize(msg_header)
 
-    data = ''
-
-    data = struct.pack(msg_header, msgtype,
-                       len(data) + msg_header_len,
-                       t_type, duration) + data
-
-    return data
+    return struct.pack(msg_header, msgtype,
+                       msg_header_len,
+                       t_type, duration)
 
 
 Message_struct['ROSpecStopTrigger'] = {
@@ -2204,7 +2203,7 @@ def encode_AISpec(par):
 
     msg_header = '!HHH'
     msg_header_len = struct.calcsize(msg_header)
-    data = ''
+    data = b''
 
     antid = par['AntennaIDs']
     antennas = []
@@ -2873,12 +2872,12 @@ def decode_EPC96(data):
     msgtype = msgtype & BITMASK(7)
     if msgtype != Message_struct['EPC-96']['type']:
         return (None, data)
-    length = tve_header_len + (96 / 8)
+    length = int(tve_header_len + (96 / 8))
     body = data[tve_header_len:length]
     logger.debug('%s (type=%d len=%d)', func(), msgtype, length)
 
     # Decode fields
-    par['EPC'] = body.encode('hex')
+    par['EPC'] = hexlify(body)
 
     return par, data[length:]
 
