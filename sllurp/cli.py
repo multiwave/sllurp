@@ -25,7 +25,8 @@ def cli(debug, logfile):
 @cli.command()
 @click.argument('host', type=str, nargs=-1)
 @click.option('-p', '--port', type=int, default=5084)
-@click.option('-t', '--time', type=float, help='seconds to inventory')
+@click.option('-t', '--time', type=float, default=5,
+              help='seconds to inventory (default 5)')
 @click.option('-n', '--report-every-n-tags', type=int,
               help='issue a TagReport every N tags')
 @click.option('-a', '--antennas', type=str, default='1',
