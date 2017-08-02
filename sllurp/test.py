@@ -201,7 +201,7 @@ class TestMessageStruct(unittest.TestCase):
     s = sllurp.llrp_proto.Message_struct
 
     def test_can_encode_or_decode(self):
-        for msg_name, msg_struct in list(self.s.items()):
+        for msg_name, msg_struct in self.s.items():
             self.assertIsInstance(msg_struct, dict)
             self.assertTrue('decode' in msg_struct or 'encode' in msg_struct)
             if 'decode' in msg_struct:
@@ -210,7 +210,7 @@ class TestMessageStruct(unittest.TestCase):
                 self.assertTrue(callable(msg_struct['encode']))
 
     def test_has_fields(self):
-        for msg_name, msg_struct in list(self.s.items()):
+        for msg_name, msg_struct in self.s.items():
             self.assertIsInstance(msg_struct, dict)
             self.assertIn('fields', msg_struct)
             self.assertIsInstance(msg_struct['fields'], list)
@@ -218,7 +218,7 @@ class TestMessageStruct(unittest.TestCase):
     @unittest.expectedFailure
     def test_unique_types(self):
         d = {}
-        for msg_name, msg_struct in list(self.s.items()):
+        for msg_name, msg_struct in self.s.items():
             self.assertIn('type', msg_struct)
             self.assertIsInstance(msg_struct['type'], int)
             self.assertNotIn(msg_struct['type'], d)

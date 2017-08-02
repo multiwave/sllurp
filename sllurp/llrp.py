@@ -1004,10 +1004,10 @@ class LLRPClient(LineReceiver):
         >>> LLRPClient.parsePowerTable({})
         [0]
         """
-        bandtbl = {k: v for k, v in list(uhfbandcap.items())
+        bandtbl = {k: v for k, v in uhfbandcap.items()
                    if k.startswith('TransmitPowerLevelTableEntry')}
         tx_power_table = [0] * (len(bandtbl) + 1)
-        for k, v in list(bandtbl.items()):
+        for k, v in bandtbl.items():
             idx = v['Index']
             tx_power_table[idx] = int(v['TransmitPowerValue']) / 100.0
 
@@ -1158,12 +1158,12 @@ class LLRPClientFactory(ClientFactory):
         proto = LLRPClient(factory=self, **clargs)
 
         # register state-change callbacks with new client
-        for state, cbs in list(self._state_callbacks.items()):
+        for state, cbs in self._state_callbacks.items():
             for cb in cbs:
                 proto.addStateCallback(state, cb)
 
         # register message callbacks with new client
-        for msg_type, cbs in list(self._message_callbacks.items()):
+        for msg_type, cbs in self._message_callbacks.items():
             for cb in cbs:
                 proto.addMessageCallback(msg_type, cb)
 

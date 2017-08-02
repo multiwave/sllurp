@@ -2537,7 +2537,7 @@ def encode_ReaderEventNotificationSpec(par):
     states = par['EventNotificationState']
 
     data = ''
-    for ev_type, flag in list(states.items()):
+    for ev_type, flag in states.items():
         parlen = struct.calcsize('!HHHB')
         data += struct.pack('!HHHB', 245, parlen, ev_type,
                             (int(bool(flag)) << 7) & 0xff)
