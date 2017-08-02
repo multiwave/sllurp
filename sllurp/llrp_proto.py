@@ -3238,7 +3238,7 @@ class LLRPROSpec(dict):
                             priority))
         if state not in ROSpecState_Name2Type:
             raise LLRPError('invalid ROSpec state {} (need [{}])'.format(
-                            state, ','.join(list(ROSpecState_Name2Type.keys()))))
+                            state, ','.join(ROSpecState_Name2Type.keys())))
 
         # if reader mode settings are specified, pepper them into this ROSpec
         override_tari = None

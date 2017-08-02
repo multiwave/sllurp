@@ -279,7 +279,7 @@ class LLRPClient(LineReceiver):
         max_ant = gdc['MaxNumberOfAntennaSupported']
         if max(self.antennas) > max_ant:
             reqd = ','.join(map(str, self.antennas))
-            avail = ','.join(map(str, list(range(1, max_ant + 1))))
+            avail = ','.join(map(str, range(1, max_ant + 1)))
             errmsg = ('Invalid antenna set specified: requested={},'
                       ' available={}; ignoring invalid antennas'.format(
                           reqd, avail))
@@ -295,7 +295,7 @@ class LLRPClient(LineReceiver):
         # fill UHFC1G2RFModeTable & check requested modulation & Tari
         regcap = capdict['RegulatoryCapabilities']
         modes = regcap['UHFBandCapabilities']['UHFRFModeTable']
-        mode_list = [modes[k] for k in sorted(list(modes.keys()), key=natural_keys)]
+        mode_list = [modes[k] for k in sorted(modes.keys(), key=natural_keys)]
 
         # select a mode by matching available modes to requested parameters:
         # favor mode_identifier over modulation
