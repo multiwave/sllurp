@@ -1,6 +1,5 @@
 import unittest
-from . import sgtin_96
-from . import gtin
+from . import sgtin_96, gtin
 import logging
 
 logLevel = logging.WARNING
