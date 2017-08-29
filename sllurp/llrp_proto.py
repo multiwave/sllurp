@@ -2844,7 +2844,7 @@ def decode_EPCData(data):
     # Decode fields
     (par['EPCLengthBits'], ) = struct.unpack('!H',
                                              body[0:struct.calcsize('!H')])
-    par['EPC'] = body[struct.calcsize('!H'):].encode('hex')
+    par['EPC'] = hexlify(body[struct.calcsize('!H'):])
 
     return par, data[length:]
 
