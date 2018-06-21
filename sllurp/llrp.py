@@ -168,7 +168,7 @@ class LLRPClient(LineReceiver):
                  report_timeout_ms=0,
                  tag_content_selector={},
                  mode_identifier=None,
-                 session=2, tag_population=4):
+                 session=2, tag_population=4, search_mode=0):
         self.factory = factory
         self.setRawMode()
         self.state = LLRPClient.STATE_DISCONNECTED
@@ -176,6 +176,7 @@ class LLRPClient(LineReceiver):
         self.report_timeout_ms = report_timeout_ms
         self.capabilities = {}
         self.reader_mode = None
+        self.search_mode = search_mode
         if isinstance(tx_power, int):
             self.tx_power = {ant: tx_power for ant in antennas}
         elif isinstance(tx_power, dict):
@@ -960,7 +961,8 @@ class LLRPClient(LineReceiver):
                        tag_content_selector=self.tag_content_selector,
                        session=self.session,
                        tari=self.tari,
-                       tag_population=self.tag_population)
+                       tag_population=self.tag_population,
+                       search_mode=self.search_mode)
         logger.debug('ROSpec: %s', self.rospec)
         return self.rospec
 

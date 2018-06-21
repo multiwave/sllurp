@@ -3226,7 +3226,7 @@ class LLRPROSpec(dict):
                  antennas=(1,), tx_power=0, duration_sec=None,
                  report_every_n_tags=None, report_timeout_ms=0,
                  tag_content_selector={}, tari=None,
-                 session=2, tag_population=4):
+                 session=2, tag_population=4, search_mode=0):
         # Sanity checks
         if rospecid <= 0:
             raise LLRPError('invalid ROSpec message ID {} (need >0)'.format(
@@ -3333,6 +3333,8 @@ class LLRPROSpec(dict):
                 }
                 antconf['C1G2InventoryCommand']['C1G2RFControl'] = rfcont
 
+            if search_mode:
+                antconf['C1G2InventoryCommand']['ImpinjInventorySearchMode'] = search_mode
             ips['AntennaConfiguration'].append(antconf)
 
         if duration_sec is not None:
