@@ -136,6 +136,7 @@ class LLRPClient(LineReceiver):
     STATE_CONNECTED = 3
     STATE_SENT_GET_CONFIG = 4
     STATE_SENT_SET_CONFIG = 5
+    STATE_SENT_IMPINJ_ENABLE_EXTENSIONS = 12
     STATE_SENT_ADD_ROSPEC = 15
     STATE_SENT_ENABLE_ROSPEC = 16
     STATE_SENT_START_ROSPEC = 17
@@ -411,6 +412,26 @@ class LLRPClient(LineReceiver):
 
             self.processDeferreds(msgName, lmsg.isSuccess())
 
+	    # first we enable Impinj a Deferred to call when we get IMPINJ_ENABLE_EXTENSIONS_RESPONSE
+            # when successfully received we get reader capabilities
+            d = defer.Deferred()
+            d.addCallback(self._setState_wrapper, LLRPClient.STATE_CONNECTED)
+            d.addErrback(self.panic, 'IMPINJ_ENABLE_EXTENSIONS failed')
+            self.send_IMPINJ_ENABLE_EXTENSIONS(onCompletion=d)
+
+        elif self.state == LLRPClient.STATE_SENT_IMPINJ_ENABLE_EXTENSIONS:
+            if msgName != 'IMPINJ_ENABLE_EXTENSIONS_RESPONSE':
+                logger.error('unexpected response %s when enabling Impinj extensions',
+                             msgName)
+                return
+
+            if not lmsg.isSuccess():
+                status = lmsg.msgdict[msgName]['LLRPStatus']['StatusCode']
+                err = lmsg.msgdict[msgName]['LLRPStatus']['ErrorDescription']
+                logger.fatal('Error %s enabling Impinj extensions: %s', status, err)
+                return
+
+            self.processDeferreds(msgName, lmsg.isSuccess())
             # a Deferred to call when we get GET_READER_CAPABILITIES_RESPONSE
             d = defer.Deferred()
             d.addCallback(self._setState_wrapper, LLRPClient.STATE_CONNECTED)
@@ -724,6 +745,20 @@ class LLRPClient(LineReceiver):
         self.setState(LLRPClient.STATE_SENT_SET_CONFIG)
         self._deferreds['SET_READER_CONFIG_RESPONSE'].append(
             onCompletion)
+
+    def send_IMPINJ_ENABLE_EXTENSIONS(self, onCompletion):
+        "allows us to use custom Impinj commands and parameters."
+        self.sendLLRPMessage(LLRPMessage(msgdict={
+            'IMPINJ_ENABLE_EXTENSIONS': {
+                'Ver':  1,
+                'Type': 1023,
+                'ID':   0,
+                'VendorIdentifier': 25882,
+                'MessageSubtype': 21,
+                'data': 32768
+            }}))
+        self.setState(LLRPClient.STATE_SENT_IMPINJ_ENABLE_EXTENSIONS)
+        self._deferreds['IMPINJ_ENABLE_EXTENSIONS_RESPONSE'].append(onCompletion)
 
     def send_ADD_ROSPEC(self, rospec, onCompletion):
         logger.debug('about to send_ADD_ROSPEC')

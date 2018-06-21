@@ -218,6 +218,63 @@ DEFAULT_MODULATION = 'M4'
 
 Message_struct = {}
 
+# MGE IMPINJ_ENABLE_EXTENSIONS
+def encode_ImpinjEnableExtensions(msg):
+    data = struct.pack('!I', int(msg['VendorIdentifier']))
+    data += struct.pack('!B', int(msg['MessageSubtype']))
+    data += struct.pack('!I', int(0))
+
+    return data
+
+Message_struct['IMPINJ_ENABLE_EXTENSIONS'] = {
+    'type': 1023,
+    'fields': [
+        'Ver', 'Type', 'ID',
+        'VendorIdentifier', 'MessageSubtype', 'skip:32'
+    ],
+    'encode': encode_ImpinjEnableExtensions
+}
+
+# MGE CUSTOM_MESSAGE
+def encode_CustomMessage(msg):
+    data = struct.pack('!I', int(msg['VendorIdentifier']))
+    data += struct.pack('!B', int(msg['MessageSubtype']))
+    data += struct.pack('!I', msg['data'])
+
+    return data
+
+Message_struct['CUSTOM_MESSAGE'] = {
+    'type': 1023,
+    'fields': [
+        'Ver', 'Type', 'ID',
+        'VendorIdentifier', 'MessageSubtype', 'data'
+    ],
+    'encode': encode_ImpinjEnableExtensions
+}
+
+def decode_GetImpinjEnableExtensionsResponse(data):
+    msg = LLRPMessageDict()
+    logger.debug(func())
+    data = data[5:]
+    # Decode parameters
+    ret, body = decode('LLRPStatus')(data)
+    if ret:
+        msg['LLRPStatus'] = ret
+    else:
+        raise LLRPError('missing or invalid LLRPStatus parameter')
+
+    return msg
+
+Message_struct['IMPINJ_ENABLE_EXTENSIONS_RESPONSE'] = {
+    'type': 1023,
+    'fields': [
+        'Ver', 'Type', 'ID',
+        'VendorIdentifier', 'MessageSubtype',
+        'LLRPStatus',
+        'Custom',
+    ],
+    'decode': decode_GetImpinjEnableExtensionsResponse
+}
 
 # 16.1.1 GET_READER_CAPABILITIES
 def encode_GetReaderCapabilities(msg):
@@ -3392,3 +3449,4 @@ for msgname, msgstruct in iteritems(Message_struct):
         pass
 
     Message_Type2Name[ty] = msgname
+Message_Type2Name[1023] = 'IMPINJ_ENABLE_EXTENSIONS_RESPONSE'
