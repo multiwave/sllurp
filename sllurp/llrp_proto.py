@@ -2390,6 +2390,8 @@ def encode_C1G2InventoryCommand(par):
     if 'C1G2SingulationControl' in par:
         data += encode('C1G2SingulationControl')(par['C1G2SingulationControl'])
     # XXX custom parameters
+    if 'ImpinjInventorySearchMode' in par:
+        data += encode('ImpinjInventorySearchMode')(par['ImpinjInventorySearchMode'])
 
     data = struct.pack(msg_header, msgtype,
                        len(data) + struct.calcsize(msg_header)) + data
@@ -2402,10 +2404,44 @@ Message_struct['C1G2InventoryCommand'] = {
         'TagInventoryStateAware',
         'C1G2Filter',
         'C1G2RFControl',
-        'C1G2SingulationControl'
+        'C1G2SingulationControl',
         # XXX custom parameters
+        'ImpinjInventorySearchMode',
     ],
     'encode': encode_C1G2InventoryCommand
+}
+
+
+def encode_ImpinjInventorySearchMode(par):
+    """custom parameter for the C1G2InventoryCommand.
+
+    hexdump looks like this for Single_Target: 03ff 000e 0000 651a 0000 0017 0001
+    """
+    choices = {
+        'Reader_Selected': 0,  # default
+        'Single_Target': 1,
+        'Dual_Target': 2,
+        'Single_Target_With_Suppression': 3,
+    }
+    mode = par['mode']
+    msgtype = Message_struct['ImpinjInventorySearchMode']['type']
+    msg_header = '!HH'
+    data = struct.pack('!I', 25882)  # VendorIdentifier
+    data += struct.pack('!I', 23)  # ParameterSubType
+    data += struct.pack('!H', mode)
+    data = struct.pack(msg_header, msgtype,
+                       len(data) + struct.calcsize(msg_header)) + data
+    return data
+
+
+Message_struct['ImpinjInventorySearchMode'] = {
+    'type': 1023,
+    'fields': [
+        'VendorIdentifier',  # 25882
+        'ParameterSubtype',  # 23
+        'ImpinjInventorySearchType',  # 0-3
+    ],
+    'encode': encode_ImpinjInventorySearchMode
 }
 
 
