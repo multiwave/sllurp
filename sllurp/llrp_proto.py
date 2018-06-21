@@ -2412,7 +2412,7 @@ Message_struct['C1G2InventoryCommand'] = {
 }
 
 
-def encode_ImpinjInventorySearchMode(par):
+def encode_ImpinjInventorySearchMode(mode):
     """custom parameter for the C1G2InventoryCommand.
 
     hexdump looks like this for Single_Target: 03ff 000e 0000 651a 0000 0017 0001
@@ -2423,7 +2423,8 @@ def encode_ImpinjInventorySearchMode(par):
         'Dual_Target': 2,
         'Single_Target_With_Suppression': 3,
     }
-    mode = par['mode']
+    if mode not in choices.values():
+        mode = choices[mode]
     msgtype = Message_struct['ImpinjInventorySearchMode']['type']
     msg_header = '!HH'
     data = struct.pack('!I', 25882)  # VendorIdentifier
