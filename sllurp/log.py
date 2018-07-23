@@ -6,8 +6,10 @@ from __future__ import unicode_literals
 import logging
 
 
-def init_logging(debug=False, logfile=None):
-    logLevel = (debug and logging.DEBUG or logging.INFO)
+def init_logging(level=False, logfile=None):
+    logLevel = logging.ERROR
+    if level:
+        logLevel = level
     logFormat = '%(asctime)s %(name)s: %(levelname)s: %(message)s'
     formatter = logging.Formatter(logFormat)
     stderr = logging.StreamHandler()
